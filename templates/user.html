@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Employee Evaluation</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <script src="/static/js/user-main.js?v=2"></script>
+</head>
+<body>
+    <div class="user-container">
+        <div class="header">
+            <h1>User Dashboard</h1>
+            <div class="header-right">
+                <span>Welcome, <span id="userName"></span>!</span>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <div class="user-panel">
+            <div class="section">
+                <h2>Select Target to Evaluate</h2>
+                <div class="dropdown-container">
+                    <select id="targetDropdown" onchange="handleTargetSelection()">
+                        <option value="">Loading...</option>
+                    </select>
+                    <button id="startEvalBtn" onclick="startSelectedEvaluation()" class="btn-primary" disabled>Start Evaluation</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Completed Evaluations</h2>
+                <div id="completedList" class="evaluations-list">
+                    <p>Loading...</p>
+                </div>
+            </div>
+            
+            <div class="credit">
+                Made by <span>icesu</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

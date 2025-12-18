@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Employee Evaluation</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+    <script src="/static/js/admin-main.js?v=2"></script>
+    <script src="/static/js/admin-users.js?v=2"></script>
+    <script src="/static/js/admin-questions.js?v=2"></script>
+    <script src="/static/js/admin-rounds.js?v=2"></script>
+    <script src="/static/js/admin-assignments.js?v=2"></script>
+    <script src="/static/js/admin-results.js?v=2"></script>
+    <script src="/static/js/admin-detail-results.js?v=2"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <div class="header-right">
+                <span>Welcome, <span id="adminName"></span>!</span>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('users')">Users</button>
+                <button class="tab-btn" onclick="showTab('questions')">Questions</button>
+                <button class="tab-btn" onclick="showTab('rounds')">Rounds</button>
+                <button class="tab-btn" onclick="showTab('assignments')">Assignments</button>
+                <button class="tab-btn" onclick="showTab('results')">Results</button>
+            </div>
+
+            <div class="tab-content">
+                <!-- Users Tab -->
+                <div id="users" class="tab-panel active">
+                    <h2>User Management</h2>
+                    <div class="panel-content">
+                        <button onclick="showCreateUser()">Create New User</button>
+                        
+                        <!-- Create User Form -->
+                        <div id="createUserForm" class="form-container hidden">
+                            <h3>Create New User</h3>
+                            <form id="userForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="empCode">Employee Code:</label>
+                                        <input type="text" id="empCode" placeholder="Enter employee code" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fullName">Full Name:</label>
+                                        <input type="text" id="fullName" placeholder="Enter full name" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="roleId">Role:</label>
+                                        <select id="roleId" required>
+                                            <option value="1">Employee</option>
+                                            <option value="2">Manager</option>
+                                            <option value="3">Senior Manager</option>
+                                            <option value="4">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="teamName">Team Name:</label>
+                                        <input type="text" id="teamName" placeholder="Enter team name" required>
+                                    </div>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="createUser()">Create User</button>
+                                    <button type="button" onclick="cancelCreateUser()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Edit User Form -->
+                        <div id="editUserForm" class="form-container hidden">
+                            <h3>Edit User</h3>
+                            <form id="editUserFormData">
+                                <input type="hidden" id="editUserId">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editEmpCode">Employee Code:</label>
+                                        <input type="text" id="editEmpCode" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editFullName">Full Name:</label>
+                                        <input type="text" id="editFullName" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editRoleId">Role:</label>
+                                        <select id="editRoleId" required>
+                                            <option value="1">Employee</option>
+                                            <option value="2">Manager</option>
+                                            <option value="3">Senior Manager</option>
+                                            <option value="4">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editTeamName">Team Name:</label>
+                                        <input type="text" id="editTeamName" required>
+                                    </div>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="updateUser()">Update User</button>
+                                    <button type="button" onclick="cancelEditUser()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div id="usersList">
+                            <p>Loading users...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions Tab -->
+                <div id="questions" class="tab-panel">
+                    <h2>Question Management</h2>
+                    <div class="panel-content">
+                        <button onclick="showCreateQuestion()">Create New Question</button>
+                        
+                        <!-- Create Question Form -->
+                        <div id="createQuestionForm" class="form-container hidden">
+                            <h3>Create New Question</h3>
+                            <form id="questionForm">
+                                <div class="form-group">
+                                    <label for="questionText">Question Text:</label>
+                                    <textarea id="questionText" placeholder="Enter question text" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sortOrder">Sort Order:</label>
+                                    <input type="number" id="sortOrder" placeholder="Enter sort order" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="isActive" checked>
+                                        Active
+                                    </label>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="createQuestion()">Create Question</button>
+                                    <button type="button" onclick="cancelCreateQuestion()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Edit Question Form -->
+                        <div id="editQuestionForm" class="form-container hidden">
+                            <h3>Edit Question</h3>
+                            <form id="editForm">
+                                <input type="hidden" id="editQuestionId">
+                                <div class="form-group">
+                                    <label for="editQuestionText">Question Text:</label>
+                                    <textarea id="editQuestionText" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editSortOrder">Sort Order:</label>
+                                    <input type="number" id="editSortOrder" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="editIsActive">
+                                        Active
+                                    </label>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="updateQuestion()">Update Question</button>
+                                    <button type="button" onclick="cancelEditQuestion()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div id="questionsList">
+                            <p>Loading questions...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rounds Tab -->
+                <div id="rounds" class="tab-panel">
+                    <h2>Evaluation Rounds</h2>
+                    <div class="panel-content">
+                        <button onclick="showCreateRound()">Create New Round</button>
+                        
+                        <!-- Create Round Form -->
+                        <div id="createRoundForm" class="form-container hidden">
+                            <h3>Create New Round</h3>
+                            <form id="roundForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="roundName">Round Name:</label>
+                                        <input type="text" id="roundName" placeholder="Enter round name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="roundIsActive" checked>
+                                            Active
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="startDate">Start Date:</label>
+                                        <input type="date" id="startDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="endDate">End Date:</label>
+                                        <input type="date" id="endDate" required>
+                                    </div>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="createRound()">Create Round</button>
+                                    <button type="button" onclick="cancelCreateRound()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Edit Round Form -->
+                        <div id="editRoundForm" class="form-container hidden">
+                            <h3>Edit Round</h3>
+                            <form id="editRoundFormData">
+                                <input type="hidden" id="editRoundId">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editRoundName">Round Name:</label>
+                                        <input type="text" id="editRoundName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="editRoundIsActive">
+                                            Active
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editStartDate">Start Date:</label>
+                                        <input type="date" id="editStartDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEndDate">End Date:</label>
+                                        <input type="date" id="editEndDate" required>
+                                    </div>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="updateRound()">Update Round</button>
+                                    <button type="button" onclick="cancelEditRound()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div id="roundsList">
+                            <p>Loading rounds...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignments Tab -->
+                <div id="assignments" class="tab-panel">
+                    <h2>Evaluation Assignments</h2>
+                    <div class="panel-content">
+                        <button onclick="showCreateAssignment()">Create Assignment</button>
+                        
+                        <!-- Create Assignment Form -->
+                        <div id="createAssignmentForm" class="form-container hidden">
+                            <h3>Create New Assignment</h3>
+                            <form id="assignmentForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="assignRoundId">Evaluation Round:</label>
+                                        <select id="assignRoundId" required>
+                                            <option value="">Select Round</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="evaluatorId">Evaluator:</label>
+                                        <select id="evaluatorId" required>
+                                            <option value="">Select Evaluator</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="targetId">Target (Person to be evaluated):</label>
+                                        <select id="targetId" required>
+                                            <option value="">Select Target</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-buttons">
+                                    <button type="button" onclick="createAssignment()">Create Assignment</button>
+                                    <button type="button" onclick="cancelCreateAssignment()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div id="assignmentsList">
+                            <p>Loading assignments...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Tab -->
+                <div id="results" class="tab-panel">
+                    <h2>Evaluation Results</h2>
+                    <div class="panel-content">
+                        <div id="resultsList">
+                            <p>Loading results...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

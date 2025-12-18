@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Evaluation System</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection">
+            <div class="header">
+                <h1>Employee Evaluation System</h1>
+                <p>Please enter your employee code to login</p>
+            </div>
+            <div class="form-group">
+                <label for="empCode">Employee Code:</label>
+                <input type="text" id="empCode" placeholder="Enter your employee code">
+            </div>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="hidden">
+            <div class="admin-panel">
+                <h2>Admin Dashboard</h2>
+                <p>Welcome to the admin panel!</p>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- User Panel -->
+        <div id="userPanel" class="hidden">
+            <div class="user-panel">
+                <h2>User Dashboard</h2>
+                <p>Welcome, <span id="userName"></span>!</p>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001/api';
+
+        async function login() {
+            const empCode = document.getElementById('empCode').value;
+            
+            if (!empCode) {
+                alert('Please enter employee code');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `emp_code=${empCode}`
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    
+                    // Store user info
+                    localStorage.setItem('userName', user.full_name);
+                    localStorage.setItem('userId', user.user_id);
+                    localStorage.setItem('roleId', user.role_id);
+                    
+                    // Redirect to appropriate page
+                    if (user.role_id === 4) {
+                        window.location.href = `/admin.html?name=${encodeURIComponent(user.full_name)}&id=${user.user_id}`;
+                    } else {
+                        window.location.href = `/user.html?name=${encodeURIComponent(user.full_name)}&id=${user.user_id}`;
+                    }
+                } else {
+                    alert('Invalid employee code');
+                }
+            } catch (error) {
+                alert('Login failed. Please try again.');
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('userPanel').classList.add('hidden');
+            document.getElementById('empCode').value = '';
+        }
+    </script>
+</body>
+</html>
