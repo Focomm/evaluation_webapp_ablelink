@@ -1213,7 +1213,7 @@ select {
     color: #888;
     letter-spacing: 0.5px;
     padding: 20px 0;
-    border-top: 1px solid #e2e8f0;
+    /* border-top: 1px solid #e2e8f0; */
 }
 
 .credit span {

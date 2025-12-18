@@ -19,7 +19,7 @@ async function loadQuestions() {
                         <div class="question-status ${q.is_active ? 'active' : 'inactive'}">
                             ${q.is_active ? 'Active' : 'Inactive'}
                         </div>
-                        <button class="edit-btn" onclick="editQuestion(${q.question_id}, '${q.question_text.replace(/'/g, "\\'").replace(/\n/g, '\\n')}', ${q.is_active}, ${q.sort_order})">
+                        <button class="edit-btn" onclick="toggleEditQuestion(this, ${q.question_id}, '${q.question_text.replace(/'/g, "\\'").replace(/\n/g, '\\n')}', ${q.is_active}, ${q.sort_order})">
                             Edit
                         </button>
                     </div>
@@ -84,24 +84,45 @@ async function createQuestion() {
     }
 }
 
-function editQuestion(questionId, questionText, isActive, sortOrder) {
-    // ซ่อนฟอร์มอื่นๆ
-    document.querySelectorAll('.form-container').forEach(form => {
-        form.classList.remove('show');
-        form.classList.add('hidden');
+function toggleEditQuestion(buttonElement, questionId, questionText, isActive, sortOrder) {
+    const questionItem = buttonElement.closest('.question-item');
+    const form = document.getElementById('editQuestionForm');
+    
+    if (!form || !questionItem) {
+        console.error('Form or question item not found');
+        return;
+    }
+    
+    // ถ้า question item นี้กำลังแก้ไขอยู่ ให้ปิด
+    if (questionItem.hasAttribute('data-editing')) {
+        cancelEditQuestion();
+        return;
+    }
+    
+    // ซ่อนฟอร์มอื่นๆ และรีเซ็ต editing state
+    document.querySelectorAll('.form-container').forEach(f => {
+        f.classList.remove('show');
+        f.classList.add('hidden');
+    });
+    document.querySelectorAll('.question-item').forEach(item => {
+        item.removeAttribute('data-editing');
     });
     
-    // หา question item ที่คลิก
-    const questionItem = event.target.closest('.question-item');
+    // ตั้งค่า editing state
+    questionItem.setAttribute('data-editing', 'true');
     
     // ใส่ข้อมูลในฟอร์ม
-    document.getElementById('editQuestionId').value = questionId;
-    document.getElementById('editQuestionText').value = questionText;
-    document.getElementById('editSortOrder').value = sortOrder;
-    document.getElementById('editIsActive').checked = isActive;
+    const editQuestionId = document.getElementById('editQuestionId');
+    const editQuestionText = document.getElementById('editQuestionText');
+    const editSortOrder = document.getElementById('editSortOrder');
+    const editIsActive = document.getElementById('editIsActive');
+    
+    if (editQuestionId) editQuestionId.value = questionId;
+    if (editQuestionText) editQuestionText.value = questionText;
+    if (editSortOrder) editSortOrder.value = sortOrder;
+    if (editIsActive) editIsActive.checked = isActive;
     
     // ย้ายฟอร์มไปใต้ item ที่คลิก
-    const form = document.getElementById('editQuestionForm');
     form.classList.remove('hidden');
     questionItem.parentNode.insertBefore(form, questionItem.nextSibling);
     
@@ -111,12 +132,31 @@ function editQuestion(questionId, questionText, isActive, sortOrder) {
     }, 10);
 }
 
+
+
 function cancelEditQuestion() {
     const form = document.getElementById('editQuestionForm');
-    form.classList.remove('show');
-    setTimeout(() => {
-        form.classList.add('hidden');
-    }, 300);
+    
+    if (form) {
+        form.classList.remove('show');
+        
+        // รีเซ็ต editing state
+        document.querySelectorAll('.question-item').forEach(item => {
+            item.removeAttribute('data-editing');
+        });
+        
+        setTimeout(() => {
+            form.classList.add('hidden');
+            // ย้ายฟอร์มกลับที่เดิม
+            const panelContent = document.querySelector('#questions .panel-content');
+            if (panelContent && form.parentNode !== panelContent) {
+                panelContent.appendChild(form);
+            }
+            // รีเซ็ตฟอร์ม
+            const editForm = document.getElementById('editForm');
+            if (editForm) editForm.reset();
+        }, 300);
+    }
 }
 
 async function updateQuestion() {
@@ -139,12 +179,14 @@ async function updateQuestion() {
         
         if (response.ok) {
             alert('Question updated successfully!');
+            // ย้ายฟอร์มกลับที่เดิมก่อน reload
             const form = document.getElementById('editQuestionForm');
-            form.classList.remove('show');
-            setTimeout(() => {
-                form.classList.add('hidden');
-                loadQuestions();
-            }, 300);
+            const panelContent = document.querySelector('#questions .panel-content');
+            if (form && panelContent && form.parentNode !== panelContent) {
+                panelContent.appendChild(form);
+            }
+            cancelEditQuestion();
+            loadQuestions();
         } else {
             alert('Failed to update question');
         }

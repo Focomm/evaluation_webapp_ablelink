@@ -24,7 +24,7 @@ async function loadRounds() {
                         <div class="round-status ${r.is_active ? 'active' : 'inactive'}">
                             ${r.is_active ? 'Active' : 'Inactive'}
                         </div>
-                        <button class="edit-btn" onclick="editRound(${r.round_id}, '${r.round_name}', '${r.start_date}', '${r.end_date}', ${r.is_active})">
+                        <button class="edit-btn" onclick="toggleEditRound(this, ${r.round_id}, '${r.round_name}', '${r.start_date}', '${r.end_date}', ${r.is_active})">
                             Edit
                         </button>
                         <button class="delete-btn" onclick="deleteRound(${r.round_id}, '${r.round_name}')">
@@ -109,25 +109,47 @@ async function createRound() {
     }
 }
 
-function editRound(roundId, roundName, startDate, endDate, isActive) {
-    // ซ่อนฟอร์มอื่นๆ
-    document.querySelectorAll('.form-container').forEach(form => {
-        form.classList.remove('show');
-        form.classList.add('hidden');
+function toggleEditRound(buttonElement, roundId, roundName, startDate, endDate, isActive) {
+    const roundItem = buttonElement.closest('.round-item');
+    const form = document.getElementById('editRoundForm');
+    
+    if (!form || !roundItem) {
+        console.error('Form or round item not found');
+        return;
+    }
+    
+    // ถ้า round item นี้กำลังแก้ไขอยู่ ให้ปิด
+    if (roundItem.hasAttribute('data-editing')) {
+        cancelEditRound();
+        return;
+    }
+    
+    // ซ่อนฟอร์มอื่นๆ และรีเซ็ต editing state
+    document.querySelectorAll('.form-container').forEach(f => {
+        f.classList.remove('show');
+        f.classList.add('hidden');
+    });
+    document.querySelectorAll('.round-item').forEach(item => {
+        item.removeAttribute('data-editing');
     });
     
-    // หา round item ที่คลิก
-    const roundItem = event.target.closest('.round-item');
+    // ตั้งค่า editing state
+    roundItem.setAttribute('data-editing', 'true');
     
     // ใส่ข้อมูลในฟอร์ม
-    document.getElementById('editRoundId').value = roundId;
-    document.getElementById('editRoundName').value = roundName;
-    document.getElementById('editStartDate').value = startDate;
-    document.getElementById('editEndDate').value = endDate;
-    document.getElementById('editRoundIsActive').checked = isActive;
+    const editRoundId = document.getElementById('editRoundId');
+    const editRoundName = document.getElementById('editRoundName');
+    const editStartDate = document.getElementById('editStartDate');
+    const editEndDate = document.getElementById('editEndDate');
+    const editRoundIsActive = document.getElementById('editRoundIsActive');
+    
+    if (editRoundId) editRoundId.value = roundId;
+    if (editRoundName) editRoundName.value = roundName;
+    if (editStartDate) editStartDate.value = startDate;
+    if (editEndDate) editEndDate.value = endDate;
+    if (editRoundIsActive) editRoundIsActive.checked = isActive;
     
     // ย้ายฟอร์มไปใต้ item ที่คลิก
-    const form = document.getElementById('editRoundForm');
     form.classList.remove('hidden');
     roundItem.parentNode.insertBefore(form, roundItem.nextSibling);
     
@@ -137,12 +159,31 @@ function editRound(roundId, roundName, startDate, endDate, isActive) {
     }, 10);
 }
 
+
+
 function cancelEditRound() {
     const form = document.getElementById('editRoundForm');
-    form.classList.remove('show');
-    setTimeout(() => {
-        form.classList.add('hidden');
-    }, 300);
+    
+    if (form) {
+        form.classList.remove('show');
+        
+        // รีเซ็ต editing state
+        document.querySelectorAll('.round-item').forEach(item => {
+            item.removeAttribute('data-editing');
+        });
+        
+        setTimeout(() => {
+            form.classList.add('hidden');
+            // ย้ายฟอร์มกลับที่เดิม
+            const panelContent = document.querySelector('#rounds .panel-content');
+            if (panelContent && form.parentNode !== panelContent) {
+                panelContent.appendChild(form);
+            }
+            // รีเซ็ตฟอร์ม
+            const editForm = document.getElementById('editRoundFormData');
+            if (editForm) editForm.reset();
+        }, 300);
+    }
 }
 
 async function updateRound() {
@@ -171,12 +212,14 @@ async function updateRound() {
         
         if (response.ok) {
             alert('Round updated successfully!');
+            // ย้ายฟอร์มกลับที่เดิมก่อน reload
             const form = document.getElementById('editRoundForm');
-            form.classList.remove('show');
-            setTimeout(() => {
-                form.classList.add('hidden');
-                loadRounds();
-            }, 300);
+            const panelContent = document.querySelector('#rounds .panel-content');
+            if (form && panelContent && form.parentNode !== panelContent) {
+                panelContent.appendChild(form);
+            }
+            cancelEditRound();
+            loadRounds();
         } else {
             alert('Failed to update round');
         }
