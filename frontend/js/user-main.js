@@ -1,6 +1,6 @@
 // User Dashboard JavaScript Functions
 
-const API_BASE = 'http://localhost:8001/api';
+const API_BASE = '/api';
 let currentUser = null;
 
 // Initialize user dashboard
@@ -155,6 +155,18 @@ function showEvaluationForm(assignId, targetName, questions) {
 async function submitEvaluation(assignId) {
     const form = document.getElementById('evaluationForm');
     const formData = new FormData(form);
+    
+    // เช็คว่าตอบครบทุกคำถามหรือไม่
+    const radioGroups = form.querySelectorAll('input[type="radio"]');
+    const questionNames = [...new Set([...radioGroups].map(radio => radio.name))];
+    
+    for (let questionName of questionNames) {
+        const isAnswered = form.querySelector(`input[name="${questionName}"]:checked`);
+        if (!isAnswered) {
+            alert('Please answer all questions before submitting.');
+            return;
+        }
+    }
     
     // Collect answers in the required format
     const answers = [];

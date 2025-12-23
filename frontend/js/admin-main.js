@@ -1,5 +1,5 @@
 // Main Admin Functions
-const API_BASE = 'http://localhost:8001/api';
+const API_BASE = '/api';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
